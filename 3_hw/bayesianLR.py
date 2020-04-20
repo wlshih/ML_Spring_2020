@@ -7,7 +7,7 @@ import pprint
 
 from seqEstimator import univariate_data_generator
 
-# polynomial regression modle data generator
+# Part 1.b: Polynomial regression model data generator
 def PR_model_generator(weight, var):
 	x = np.random.uniform(-1.0, 1.0, 1)
 	y = 0.0
@@ -53,6 +53,7 @@ def print_iteration(cnt, x, y, mean_post, var_post, mean_predict, var_predict):
 	return
 
 
+# Part 3: Bayesian linear regression
 if __name__ == "__main__":
 	precision, poly_bases, var, weight = read_input()
 	
@@ -67,7 +68,8 @@ if __name__ == "__main__":
 
 	A = build_matrix(x, poly_bases)
 	
-	var_post = np.linalg.inv(var * np.matmul(A.T, A) + precision * np.eye(poly_bases))
+	var_post_inv = var * np.matmul(A.T, A) + precision * np.eye(poly_bases)
+	var_post = np.linalg.inv(var_post_inv)
 	mean_post = var * np.matmul(var_post, A.T) * y
 
 	var_predict = 1 / var + np.matmul(np.matmul(A, var_post), A.T)
@@ -84,15 +86,16 @@ if __name__ == "__main__":
 
 		A = build_matrix(x, poly_bases)
 		
+		var_prior_inv = var_post_inv.copy()
 		var_prior = var_post.copy()
-		var_prior_inv = np.linalg.inv(var_prior)
 		mean_prior = mean_post.copy()
 		
-		var_post = np.linalg.inv(var * np.matmul(A.T, A) + np.linalg.inv(var_prior))
+		var_post_inv = var * np.matmul(A.T, A) + var_prior_inv
+		var_post = np.linalg.inv(var_post_inv)
 		mean_post = np.matmul(var_post, (var * A.T * y + np.matmul(var_prior_inv, mean_prior)))
 
-		var_predictive = 1 / var + np.matmul(np.matmul(A, var_post), A.T)
-		mean_predictive = np.matmul(A, mean_post)
+		var_predict = 1 / var + np.matmul(np.matmul(A, var_post), A.T)
+		mean_predict = np.matmul(A, mean_post)
 
 		print_iteration(cnt, x, y, mean_post, var_post, mean_predict, var_predict)
 
@@ -119,6 +122,7 @@ if __name__ == "__main__":
 	# ground truth
 	plt.subplot(221)
 	plt.xlim(-2.0, 2.0)
+	plt.ylim(-15.0, 25)
 	plt.title("Ground Truth")
 
 	ground_func = np.poly1d(np.flip(weight))
@@ -136,6 +140,7 @@ if __name__ == "__main__":
 	# predice result
 	plt.subplot(222)
 	plt.xlim(-2.0, 2.0)
+	plt.ylim(-15.0, 25)
 	plt.title("Predict result")
 
 	predict_x = np.linspace(-2.0, 2.0, 30)
@@ -146,7 +151,7 @@ if __name__ == "__main__":
 
 	for i in range(len(predict_x)):
 		predict_A = build_matrix(predict_x[i], poly_bases)
-		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_post), A.T)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_post), predict_A.T)
 		predict_y_plus[i] += predict_var_predict[0]
 		predict_y_minus[i] -= predict_var_predict[0]
 
@@ -158,6 +163,7 @@ if __name__ == "__main__":
 	# after 10 incomes
 	plt.subplot(223)
 	plt.xlim(-2.0, 2.0)
+	plt.ylim(-15.0, 25)
 	plt.title("Predict result")
 
 	predict_x = np.linspace(-2.0, 2.0, 30)
@@ -168,7 +174,7 @@ if __name__ == "__main__":
 
 	for i in range(len(predict_x)):
 		predict_A = build_matrix(predict_x[i], poly_bases)
-		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_10), A.T)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_10), predict_A.T)
 		predict_y_plus[i] += predict_var_predict[0]
 		predict_y_minus[i] -= predict_var_predict[0]
 
@@ -181,6 +187,7 @@ if __name__ == "__main__":
 	# after 50 incomes
 	plt.subplot(224)
 	plt.xlim(-2.0, 2.0)
+	plt.ylim(-15.0, 25)
 	plt.title("Predict result")
 
 	predict_x = np.linspace(-2.0, 2.0, 30)
@@ -191,7 +198,7 @@ if __name__ == "__main__":
 
 	for i in range(len(predict_x)):
 		predict_A = build_matrix(predict_x[i], poly_bases)
-		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_50), A.T)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_50), predict_A.T)
 		predict_y_plus[i] += predict_var_predict[0]
 		predict_y_minus[i] -= predict_var_predict[0]
 
