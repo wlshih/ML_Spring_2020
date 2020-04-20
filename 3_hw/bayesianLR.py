@@ -53,7 +53,6 @@ def print_iteration(cnt, x, y, mean_post, var_post, mean_predict, var_predict):
 	return
 
 
-
 if __name__ == "__main__":
 	precision, poly_bases, var, weight = read_input()
 	
@@ -103,12 +102,109 @@ if __name__ == "__main__":
 		# data recording
 		if cnt == 10:
 			mean_10 = mean_post.copy()
-			S_inv_10 = np.linalg.inv(var_post)
+			var_10 = var_post.copy()
 			data_x_10 = data_x.copy()
 			data_y_10 = data_y.copy()
 
 		if cnt == 50:
 			mean_50 = mean_post.copy()
-			S_inv_50 = np.linalg.inv(var_post)
+			var_50 = var_post.copy()
 			data_x_50 = data_x.copy()
 			data_y_50 = data_y.copy()
+
+
+
+
+	# display plot
+	# ground truth
+	plt.subplot(221)
+	plt.xlim(-2.0, 2.0)
+	plt.title("Ground Truth")
+
+	ground_func = np.poly1d(np.flip(weight))
+	ground_x = np.linspace(-2.0, 2.0, 30)
+	ground_y = ground_func(ground_x)
+	plt.plot(ground_x, ground_y, color = 'black')
+	
+	ground_y += var
+	plt.plot(ground_x, ground_y, color = 'red')
+
+	ground_y -= 2 * var
+	plt.plot(ground_x, ground_y, color = 'red')
+
+
+	# predice result
+	plt.subplot(222)
+	plt.xlim(-2.0, 2.0)
+	plt.title("Predict result")
+
+	predict_x = np.linspace(-2.0, 2.0, 30)
+	predict_func = np.poly1d(np.flip(mean_post.flatten()))
+	predict_y = predict_func(predict_x)
+	predict_y_plus = predict_func(predict_x)
+	predict_y_minus = predict_func(predict_x)
+
+	for i in range(len(predict_x)):
+		predict_A = build_matrix(predict_x[i], poly_bases)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_post), A.T)
+		predict_y_plus[i] += predict_var_predict[0]
+		predict_y_minus[i] -= predict_var_predict[0]
+
+	plt.plot(predict_x, predict_y, color = 'black')
+	plt.plot(predict_x, predict_y_plus, color = 'red')
+	plt.plot(predict_x, predict_y_minus, color = 'red')
+	plt.scatter(data_x, data_y)
+
+	# after 10 incomes
+	plt.subplot(223)
+	plt.xlim(-2.0, 2.0)
+	plt.title("Predict result")
+
+	predict_x = np.linspace(-2.0, 2.0, 30)
+	predict_func = np.poly1d(np.flip(mean_10.flatten()))
+	predict_y = predict_func(predict_x)
+	predict_y_plus = predict_func(predict_x)
+	predict_y_minus = predict_func(predict_x)
+
+	for i in range(len(predict_x)):
+		predict_A = build_matrix(predict_x[i], poly_bases)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_10), A.T)
+		predict_y_plus[i] += predict_var_predict[0]
+		predict_y_minus[i] -= predict_var_predict[0]
+
+	plt.plot(predict_x, predict_y, color = 'black')
+	plt.plot(predict_x, predict_y_plus, color = 'red')
+	plt.plot(predict_x, predict_y_minus, color = 'red')
+	plt.scatter(data_x_10, data_y_10)
+
+
+	# after 50 incomes
+	plt.subplot(224)
+	plt.xlim(-2.0, 2.0)
+	plt.title("Predict result")
+
+	predict_x = np.linspace(-2.0, 2.0, 30)
+	predict_func = np.poly1d(np.flip(mean_50.flatten()))
+	predict_y = predict_func(predict_x)
+	predict_y_plus = predict_func(predict_x)
+	predict_y_minus = predict_func(predict_x)
+
+	for i in range(len(predict_x)):
+		predict_A = build_matrix(predict_x[i], poly_bases)
+		predict_var_predict = 1 / var + np.matmul(np.matmul(predict_A, var_50), A.T)
+		predict_y_plus[i] += predict_var_predict[0]
+		predict_y_minus[i] -= predict_var_predict[0]
+
+	plt.plot(predict_x, predict_y, color = 'black')
+	plt.plot(predict_x, predict_y_plus, color = 'red')
+	plt.plot(predict_x, predict_y_minus, color = 'red')
+	plt.scatter(data_x_50, data_y_50)
+
+	plt.tight_layout()
+	plt.show()
+
+
+
+
+
+
