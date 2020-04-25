@@ -53,6 +53,8 @@ def print_iteration(cnt, x, y, mean_post, var_post, mean_predict, var_predict):
 	return
 
 
+
+
 # Part 3: Bayesian linear regression
 if __name__ == "__main__":
 	precision, poly_bases, var, weight = read_input()
@@ -164,7 +166,7 @@ if __name__ == "__main__":
 	plt.subplot(223)
 	plt.xlim(-2.0, 2.0)
 	plt.ylim(-15.0, 25)
-	plt.title("Predict result")
+	plt.title("After 10 incomes")
 
 	predict_x = np.linspace(-2.0, 2.0, 30)
 	predict_func = np.poly1d(np.flip(mean_10.flatten()))
@@ -188,7 +190,7 @@ if __name__ == "__main__":
 	plt.subplot(224)
 	plt.xlim(-2.0, 2.0)
 	plt.ylim(-15.0, 25)
-	plt.title("Predict result")
+	plt.title("After 50 incomes")
 
 	predict_x = np.linspace(-2.0, 2.0, 30)
 	predict_func = np.poly1d(np.flip(mean_50.flatten()))
