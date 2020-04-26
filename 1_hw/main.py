@@ -128,6 +128,7 @@ def matrix_scale(A, scalar):
 			B[i][j] = A[i][j] * scalar
 	return B
 
+# sum of element-wise square
 def difference(A):
 	tmp = 0
 	for i in range(len(A)):
@@ -194,9 +195,13 @@ def display(result_lse, result_newton, X, Y):
 
 if __name__ == '__main__':
 
-	filename = sys.argv[1]
-	poly_bases = int(sys.argv[2])
-	lse_lambda = float(sys.argv[3])
+	try:
+		filename = sys.argv[1]
+		poly_bases = int(sys.argv[2])
+		lse_lambda = float(sys.argv[3])
+	except:
+		print("Usage: python3 main.py <datafile> <n> <lambda>")
+		quit()
 
 	x, y = read_file(filename)
 	A = matrix_A(x, poly_bases)
@@ -220,11 +225,11 @@ if __name__ == '__main__':
 	A_transpose_b_2 = matrix_scale(matrix_mult(A_transpose, b), 2)
 
 	while(1):
-		tmp = x_new
-		gradient = matrix_sub(matrix_scale(matrix_mult(A_transpose_A, x_new), 2), A_transpose_b_2)
-		x_new = matrix_sub(x_new, matrix_mult(hessian_inverse, gradient))
+		x_0 = x_new
+		gradient = matrix_sub(matrix_scale(matrix_mult(A_transpose_A, x_0), 2), A_transpose_b_2)
+		x_new = matrix_sub(x_0, matrix_mult(hessian_inverse, gradient))
 
-		if difference(matrix_sub(x_new, tmp)) < poly_bases:
+		if difference(matrix_sub(x_new, x_0)) < poly_bases:
 			break
 
 	result_newton = formula(A, x_new, b, "Newton")
