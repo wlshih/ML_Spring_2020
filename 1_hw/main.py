@@ -128,13 +128,6 @@ def matrix_scale(A, scalar):
 			B[i][j] = A[i][j] * scalar
 	return B
 
-# sum of element-wise square
-def difference(A):
-	tmp = 0
-	for i in range(len(A)):
-		for j in range(len(A[0])):
-			tmp += (A[i][j])**2
-	return math.sqrt(tmp)
 
 # return formula and print at the same time
 def formula(A, x_hat, b, title):
@@ -217,20 +210,16 @@ if __name__ == '__main__':
 	
 
 	# Newton
-	x_new = []
+	x_0 = []
 	for i in range(poly_bases):
-		x_new.append([100])
+		x_0.append([100])
 
 	hessian_inverse = matrix_inverse(matrix_scale(A_transpose_A, 2))
 	A_transpose_b_2 = matrix_scale(matrix_mult(A_transpose, b), 2)
 
-	while(1):
-		x_0 = x_new
-		gradient = matrix_sub(matrix_scale(matrix_mult(A_transpose_A, x_0), 2), A_transpose_b_2)
-		x_new = matrix_sub(x_0, matrix_mult(hessian_inverse, gradient))
+	gradient = matrix_sub(matrix_scale(matrix_mult(A_transpose_A, x_0), 2), A_transpose_b_2)
+	x_new = matrix_sub(x_0, matrix_mult(hessian_inverse, gradient))
 
-		if difference(matrix_sub(x_new, x_0)) < poly_bases:
-			break
 
 	result_newton = formula(A, x_new, b, "Newton")
 
