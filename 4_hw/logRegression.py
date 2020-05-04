@@ -61,6 +61,34 @@ def sigmoid(X, w):
 
 	return np.array(result)
 
+def print_confusion(predict, y):
+	TN = 0
+	FN = 0
+	TP = 0
+	FP = 0
+
+	for i in range(np.shape(predict)[0]):
+		# predict negative
+		if predict[i][0] == 0:
+			if y[i][0] == 0:
+				TN += 1
+			else:
+				FN += 1
+		# predict positive
+		else:
+			if y[i][0] == 0:
+				FP += 1
+			else:
+				TP += 1
+
+	print("Confusion matrix:")
+	print("\t\tPredict cluster 0\tPredict cluster 1")
+	print("Real cluster 0\t\t{}\t\t\t{}".format(TN,FP))
+	print("Real cluster 1\t\t{}\t\t\t{}\n".format(FN,TP))
+	print("Sensitivity (Successfully predict cluster 0): {}".format(TN / (TN + FP)))
+	print("Specificity (Successfully predict cluster 1): {}".format(TP / (TP + FN)))
+
+		
 
 if __name__ == "__main__":
 
@@ -80,24 +108,22 @@ if __name__ == "__main__":
 		
 		w_0 = np.copy(w_new)
 	
-	predict = np.matmul(X, w_0)
-	print(predict)
-	predict[predict > 0.5] = 1
-	predict[predict <= 0.5] = 0
-	print(predict)
-
 	print("Gradient descent:")
 	print("w:")
 	np.savetxt(sys.stdout, w_0, fmt="  %.10f")
+	print("")
 
 	# confusion matrix
+	predict = np.matmul(X, w_0)
+	#print(predict)
+	predict[predict > 0.5] = 1
+	predict[predict <= 0.5] = 0
+	#print(predict)
 
-	print("Confusion matrix:")
-	print("\t\tPredict cluster 0\tPredict cluster 1")
-	print("Real cluster 0\t\t{}\t\t\t{}".format(TN,FP))
-	print("Real cluster 1\t\t{}\t\t\t{}".format(FN,TP))
-	print("Sensitivity (Successfully predict cluster 0): {}".format(TN / (TN + FP)))
-	print("Specificity (Successfully predict cluster 1): {}".format(TP / (TP + FN)))
+	print_confusion(predict, y)
+	print("-------------------------------------\n")
+
+	
 
 	
 	# Newton's method
