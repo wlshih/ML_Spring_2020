@@ -65,18 +65,17 @@ def sigmoid(X, w):
 if __name__ == "__main__":
 
 	X, y = get_data()
-	print(X)
-	print(y)
+	#print(X)
+	#print(y)
 
 	# Gradient descent
 	w_0 = np.array([[0.0], [0.0], [0.0]])
 	while(True):
 		gradient = np.matmul(X.T, (y - sigmoid(X, w_0)))
-		w_new = w_0 + gradient
+		w_new = w_0 + gradient * 0.01
 
-		print(np.sum(gradient))
-		print(w_0)
-		if(abs(np.sum(gradient)) < 1e-3):
+		#print(np.sum(gradient))
+		if(abs(np.sum(gradient)) < 1e-4):
 			break
 		
 		w_0 = np.copy(w_new)
@@ -85,6 +84,7 @@ if __name__ == "__main__":
 	print(predict)
 	predict[predict > 0.5] = 1
 	predict[predict <= 0.5] = 0
+	print(predict)
 
 	print("Gradient descent:")
 	print("w:")
