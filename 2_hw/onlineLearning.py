@@ -25,6 +25,7 @@ if __name__ == "__main__":
 			case += 1
 			print("case ", case, ": ", line)
 
+			# N = a+b, m = a
 			m = 0
 			N = len(line)
 			for i in range(N):
@@ -33,6 +34,8 @@ if __name__ == "__main__":
 			likelihood = ( factorial(N) / ( factorial(m) * factorial(N - m) ) ) * ((m / N) ** m) * ((1 - m / N) ** (N - m))
 			print("Likelihood: ", likelihood)
 			print("Beta prior:\ta = ", a, "\tb = ", b)
+
+			# Beta(p, a+m, b+N-m)
 			a += m
 			b += (N - m)
 			print("Beta posterior:\ta = ", a, "\tb = ", b)

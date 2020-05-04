@@ -170,6 +170,9 @@ def result(prob, ans):
 
 
 # Part 1: Naive Bayes classifier
+#
+# mode 0: discrete
+# mode 1: continuous
 if __name__ == '__main__':
 	if sys.argv[1] == '0':
 		prior, imgBin = readTrainDiscrete()
