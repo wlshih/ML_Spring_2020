@@ -3,6 +3,7 @@
 import numpy as np
 import math
 import sys
+import matplotlib.pyplot as plt
 
 def univariate_data_generator(mean, var):
 	standard_normal = np.sum(np.random.uniform(0.0, 1.0, 12)) - 6
@@ -89,7 +90,67 @@ def print_confusion(predict, y):
 	print("Specificity (Successfully predict cluster 1): {}".format(TP / (TP + FN)))
 
 
-def display(X, y):
+def display(X, y, w_gradient, w_newton):
+	# ground truth
+	D1x = []
+	D1y = []
+	D2x = []
+	D2y = []
+
+	for i in range(len(y)):
+		if y[i][0] == 0:
+			D1x.append(X[i][1])
+			D1y.append(X[i][2])
+		else:
+			D2x.append(X[i][1])
+			D2y.append(X[i][2])
+
+	plt.subplot(131)
+	plt.title("Ground truth")
+	plt.scatter(D1x, D1y, c = 'r')
+	plt.scatter(D2x, D2y, c = 'b')
+
+	# steepest descent
+	D1x = []
+	D1y = []
+	D2x = []
+	D2y = []
+
+	for i in range(len(y)):
+		if predict_gradient[i][0] == 0:
+			D1x.append(X[i][1])
+			D1y.append(X[i][2])
+		else:
+			D2x.append(X[i][1])
+			D2y.append(X[i][2])
+
+	plt.subplot(132)
+	plt.title("Gradient descent")
+	plt.scatter(D1x, D1y, c = 'r')
+	plt.scatter(D2x, D2y, c = 'b')
+
+	# with Newton's optimization
+	D1x = []
+	D1y = []
+	D2x = []
+	D2y = []
+
+	for i in range(len(y)):
+		if predict_newton[i][0] == 0:
+			D1x.append(X[i][1])
+			D1y.append(X[i][2])
+		else:
+			D2x.append(X[i][1])
+			D2y.append(X[i][2])
+
+	plt.subplot(133)
+	plt.title("Newton's method")
+	plt.scatter(D1x, D1y, c = 'r')
+	plt.scatter(D2x, D2y, c = 'b')
+
+
+	plt.tight_layout()
+	plt.show()
 	return
 
 if __name__ == "__main__":
@@ -100,10 +161,8 @@ if __name__ == "__main__":
 
 	# Gradient descent
 	w_0 = np.array([[0.0], [0.0], [0.0]])
-	alpha = 1.0   # learning rate = alpha
+	alpha = 0.01   # learning rate = alpha
 	while(True):
-		if alpha >= 0.005:
-			alpha *= 0.5 
 		gradient = np.matmul(X.T, (y - sigmoid(X, w_0)))
 		w_new = w_0 + alpha * gradient
 
@@ -113,19 +172,19 @@ if __name__ == "__main__":
 		
 		w_0 = np.copy(w_new)
 	
+	w_gradient = np.copy(w_new)  # for data recording
 	print("Gradient descent:")
 	print("w:")
-	np.savetxt(sys.stdout, w_new, fmt="  %.10f")
+	np.savetxt(sys.stdout, w_gradient, fmt="  %.10f")
 	print("")
 
 	# confusion matrix
-	predict = sigmoid(X, w_new)
-	#print(predict)
-	predict[predict > 0.5] = 1
-	predict[predict <= 0.5] = 0
-	#print(predict)
+	predict_gradient = sigmoid(X, w_new)
+	predict_gradient[predict_gradient > 0.5] = 1
+	predict_gradient[predict_gradient <= 0.5] = 0
 
-	print_confusion(predict, y)
+	print_confusion(predict_gradient, y)
+
 	print("-------------------------------------\n")
 
 	
@@ -135,19 +194,18 @@ if __name__ == "__main__":
 	gradient = (2 * np.matmul(X.T, np.matmul(X, w_0))) - (2 * np.matmul(X.T, (y - sigmoid(X, w_0))))
 	w_new = w_0 - np.matmul(np.linalg.inv(hessian), gradient)
 
+	w_newton = np.copy(w_new)  # for data recording
 	print("Newton's method:")
 	print("w:")
-	np.savetxt(sys.stdout, w_new, fmt = "  %.10f")
+	np.savetxt(sys.stdout, w_newton, fmt = "  %.10f")
 	print("")
 
 	# confusion matrix
-	predict = sigmoid(X, w_new)
-	predict[predict > 0.5] = 1
-	predict[predict <= 0.5] = 0
-	print_confusion(predict, y)
-
-
+	predict_newton = sigmoid(X, w_new)
+	predict_newton[predict_newton > 0.5] = 1
+	predict_newton[predict_newton <= 0.5] = 0
+	print_confusion(predict_newton, y)
 
 
 	# display plot
-	display(X, y)
+	display(X, y, predict_gradient, predict_newton)
