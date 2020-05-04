@@ -88,7 +88,9 @@ def print_confusion(predict, y):
 	print("Sensitivity (Successfully predict cluster 0): {}".format(TN / (TN + FP)))
 	print("Specificity (Successfully predict cluster 1): {}".format(TP / (TP + FN)))
 
-		
+
+def display(X, y):
+	return
 
 if __name__ == "__main__":
 
@@ -98,9 +100,12 @@ if __name__ == "__main__":
 
 	# Gradient descent
 	w_0 = np.array([[0.0], [0.0], [0.0]])
+	alpha = 1.0   # learning rate = alpha
 	while(True):
+		if alpha >= 0.005:
+			alpha *= 0.5 
 		gradient = np.matmul(X.T, (y - sigmoid(X, w_0)))
-		w_new = w_0 + gradient * 0.01
+		w_new = w_0 + alpha * gradient
 
 		#print(np.sum(gradient))
 		if(abs(np.sum(gradient)) < 1e-4):
@@ -110,11 +115,11 @@ if __name__ == "__main__":
 	
 	print("Gradient descent:")
 	print("w:")
-	np.savetxt(sys.stdout, w_0, fmt="  %.10f")
+	np.savetxt(sys.stdout, w_new, fmt="  %.10f")
 	print("")
 
 	# confusion matrix
-	predict = np.matmul(X, w_0)
+	predict = sigmoid(X, w_new)
 	#print(predict)
 	predict[predict > 0.5] = 1
 	predict[predict <= 0.5] = 0
@@ -124,7 +129,25 @@ if __name__ == "__main__":
 	print("-------------------------------------\n")
 
 	
-
-	
 	# Newton's method
+	w_0 = np.array([[0.0], [0.0], [0.0]])
+	hessian = 2 * np.matmul(X.T, X)
+	gradient = (2 * np.matmul(X.T, np.matmul(X, w_0))) - (2 * np.matmul(X.T, (y - sigmoid(X, w_0))))
+	w_new = w_0 - np.matmul(np.linalg.inv(hessian), gradient)
 
+	print("Newton's method:")
+	print("w:")
+	np.savetxt(sys.stdout, w_new, fmt = "  %.10f")
+	print("")
+
+	# confusion matrix
+	predict = sigmoid(X, w_new)
+	predict[predict > 0.5] = 1
+	predict[predict <= 0.5] = 0
+	print_confusion(predict, y)
+
+
+
+
+	# display plot
+	display(X, y)
