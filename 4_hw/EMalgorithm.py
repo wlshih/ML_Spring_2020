@@ -11,13 +11,29 @@ def read_data():
 	data_type = np.dtype("int32").newbyteorder('>')  # big endian
 
 	data = np.fromfile(fnImage, dtype = 'ubyte').astype("float64")
-	data = data[4 * data_type.itemsize : ].reshape(60000, 28 * 28).transpose()  # ignore 16-byte headers
+	data = data[4 * data_type.itemsize : ].reshape(60000, 28 * 28)  # ignore 16-byte headers
 	data = np.divide(data, 128).astype("int")
 
 	label = np.fromfile(fnLabel, dtype = 'ubyte').astype('int')
 	label = label[2 * data_type.itemsize : ].reshape(60000)  # ignore 8-byte headers
-	
+
 	return data, label
+
+
+# for debug, print data image
+def print_data(data):
+	for i in range(len(data)):
+		for j in range(len(data[0])):
+			if j % 28 == 0:
+				print("")
+			if data[i][j]:
+				print(" ", end=' ')
+			else:
+				print(data[i][j], end=' ')
+		print("")
+	
+	return
+	
 
 @jit
 def E_step(data, lamb, P):
@@ -52,7 +68,7 @@ def M_step(data, lamb, P, Z):
 		if N == 0:
 			N = 1
 		for i in range(28 * 28):
-			P[i][k] = np.sum(np.matmul(Z[k], data[:][i])) / N
+			P[i][k] = np.dot(Z[k], data.T[i]) / N
 
 	return lamb, P
 			
@@ -76,9 +92,10 @@ def EM_algorithm():
 
 	print("---(read data)---")
 	data, label = read_data()
+	#print_data(data)
 	print("\n  train data size: {}\n".format(data.shape))
 
-
+	# initialize
 	P = np.random.rand(28 * 28, 10).astype(np.float64)    # probability of each bit of each class
 	Z = np.full((10, 60000), 0.1, dtype=np.float64)       # responsibility
 	lamb = np.full(10, 0.1, dtype=np.float64)             # lambda, mean MLE of each class
