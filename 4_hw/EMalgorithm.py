@@ -86,8 +86,12 @@ def print_imagin(P):
 				print("0", end=' ')
 		print("")
 
+# print condition matrix of each cluster
+def print_condition():
 
-#@jit
+
+
+@jit
 def EM_algorithm():
 
 	print("---(read data)---")
@@ -97,9 +101,9 @@ def EM_algorithm():
 
 	# initialize
 	P = np.random.rand(28 * 28, 10).astype(np.float64)    # probability of each bit of each class
+	P_prev = np.zeros((28 * 28, 10), dtype=np.float64)    # probability from last iteration, for convergence test
 	Z = np.full((10, 60000), 0.1, dtype=np.float64)       # responsibility
 	lamb = np.full(10, 0.1, dtype=np.float64)             # lambda, mean MLE of each class
-	lamb_prev = np.zeros(10, dtype=np.float64)            # lambda from last iteration, for convergence test
 
 
 	cond = 0
@@ -124,12 +128,13 @@ def EM_algorithm():
 			print("---(restart)---")
 		else:
 			cond += 1
-
-		diff = np.sum(abs(lamb - lamb_prev))
-		if diff < 5e-3 and cond >= 8 and np.sum(P) > 0.95:
+		
+		# convergence test
+		diff = np.sum(abs(P - P_prev))
+		if diff < 7.84 and cond >= 8 and np.sum(lamb) > 0.95:
 			break
 		
-		lamb_prev = np.copy(lamb)
+		P_prev = np.copy(P)
 
 		print_imagin(P)
 		print("No. of Iteration: {}, Difference: {}\n".format(it, diff))
