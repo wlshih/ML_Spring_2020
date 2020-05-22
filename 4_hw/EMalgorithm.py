@@ -87,17 +87,12 @@ def print_imagin(P):
 		print("")
 
 # print condition matrix of each cluster
-def print_condition():
+#def print_condition():
 
 
 
 @jit
-def EM_algorithm():
-
-	print("---(read data)---")
-	data, label = read_data()
-	#print_data(data)
-	print("\n  train data size: {}\n".format(data.shape))
+def EM_algorithm(data):
 
 	# initialize
 	P = np.random.rand(28 * 28, 10).astype(np.float64)    # probability of each bit of each class
@@ -129,21 +124,96 @@ def EM_algorithm():
 		else:
 			cond += 1
 		
-		# convergence test
+		print_imagin(P)
 		diff = np.sum(abs(P - P_prev))
-		if diff < 7.84 and cond >= 8 and np.sum(lamb) > 0.95:
+		print("No. of Iteration: {}, Difference: {}\n".format(it, diff))
+		print("---------------------------------------------------------------------------\n")
+	
+		# convergence test, 784 * 0.01
+		if diff < 78.4 and cond >= 8 and np.sum(lamb) > 0.95:
 			break
 		
 		P_prev = np.copy(P)
 
-		print_imagin(P)
-		print("No. of Iteration: {}, Difference: {}\n".format(it, diff))
-		print("---------------------------------------------------------------------------\n")
+	print("---------------------------------------------------------------------------\n")
+
+	return P, lamb
+
+@jit
+def assign_label(label, P, lamb):
+	table = np.zeros(shape=(10, 10), dtype=np.int)
+	relation = np.full((10), -1, dtype=np.int)
+	# each data
+	for n in range(60000):
+		tmp = np.copy(lamb)
+		# each class
+		for k in range(10):
+			# each pixel
+			for i in range(28 * 28):
+				if data[n][i]:
+					tmp[k] *= P[i][k]
+				else:
+					tmp[k] *= (1 - P[i][k])
+
+		table[label[n]][np.argmax(tmp)] += 1
+		predict = np.where(relation==np.argmax(tmp))
+
+	print(table)
+	print(predict)
+
+	for k in range(10):
+		ind = np.unravel_index(np.argmax(table, axis=None), table.shape)
+		relation[ind[0]] = ind[1]
+		for i in range(k):
+			table[i][ind[1]] = -1
+			table[ind[0]][i] = -1
+
+	print_label(relation, P)
+
+
+def print_label(relation, P):
+	for k in range(10):
+		cluster = relation[k]
+		print("\nLabeled class : ", k)
+		
+		for i in range(28*28):
+			if i % 28 == 0 and i != 0:
+				print("")
+			if P[i][cluster] > 0.5:
+				print(" ", end=" ")
+			else:
+				print("0", end=" ")
+		print(" ")
+
+def print_confusion():
+    
+	error = 60000
+	confusion = np.zeros(shape=(10, 4), dtype=np.int)
+	predict = np.where(relation==np.argmax(tmp))
+	print(predict)
+
+	for k in range(10):
+		if k == label[k]:
+			if k == predict:
+				error -= 1
+				confusion[k][0] += 1
+			else:
+				confusion[k][3] += 1
+		else:
+			if k == predict:
+				confusion[k][1] += 1
+			else:
+				confusion[k][2] += 1
+
 	
-	print("---------------------------------------------------------------\n")
-
-
-
+	for k in range(10):
+		print("Confusion matrix {}:".format(k))
+		print("\t\tPredict number {}\tPredict not number {}".format(k, k))
+		print("Is number {}\t\t{}\t\t\t{}".format(k, confusion[k][0], confusion[k][3]))
+		print("Isn't number {}\t\t{}\t\t\t{}".format(k, confusion[k][1], confusion[k][2]))
+		print("Sensitivity (Successfully predict number {}): {}".format(k, confusion[k][0] / (confusion[k][0] + confusion[k][3])))
+		print("Specificity (Successfully predict not number {}): {}".format(k, confusion[k][2] / (confusion[k][2] + confusion[k][1])))
+		print("---------------------------------------------------------------\n")
 
 
 
@@ -151,4 +221,12 @@ if __name__ == "__main__":
 	
 	filterwarnings("ignore")
 
-	EM_algorithm()
+	print("---(read data)---")
+	data, label = read_data()
+	#print_data(data)
+	print("\n  train data size: {}\n".format(data.shape))
+
+	P, lamb = EM_algorithm(data)
+
+	assign_label(label, P, lamb)
+
